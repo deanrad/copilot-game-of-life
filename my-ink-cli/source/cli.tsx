@@ -1,6 +1,8 @@
 // @ts-nocheck
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {render, Box, Text} from 'ink';
+import {interval} from 'rxjs';
+import {startWith, scan} from 'rxjs/operators';
 
 // Initialize a 20x20 grid with random values
 const grid = Array.from({length: 20}, () =>
@@ -46,18 +48,38 @@ function countAliveNeighbors(grid, i, j) {
 	return aliveNeighbors;
 }
 
-// React component to render the grid
-const GameOfLife = ({grid}) => (
-	<Box flexDirection="column">
-		{grid.map((row, i) => (
-			<Box key={i}>
-				{row.map((cell, j) => (
-					<Text key={j}>{cell === 1 ? '■' : '□'}</Text>
-				))}
-			</Box>
-		))}
-	</Box>
+// Create an observable of the board state
+const boardState$ = interval(750).pipe(
+	startWith(grid),
+	scan(grid => calculateNextGeneration(grid)),
 );
 
+// React component to render the grid
+const GameOfLife = () => {
+	const [grid, setGrid] = useState([[]]);
+
+	useEffect(() => {
+		const subscription = boardState$.subscribe(board => {
+			setGrid(board);
+		});
+
+		return () => {
+			subscription.unsubscribe();
+		};
+	}, []);
+
+	return (
+		<Box flexDirection="column">
+			{grid.map((row, i) => (
+				<Box key={i}>
+					{row.map((cell, j) => (
+						<Text key={j}>{cell === 1 ? '■' : '□'}</Text>
+					))}
+				</Box>
+			))}
+		</Box>
+	);
+};
+
 // Render the game
-render(<GameOfLife grid={grid} />);
+render(<GameOfLife />);
