@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "ink": "^4.4.1",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.23.3",
+    "tsc": "^2.0.4",
+    "typescript": "^5.3.2"
+  }
+}
